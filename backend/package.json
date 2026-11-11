@@ -1,0 +1,36 @@
+{
+  "name": "silver-business-suite-backend",
+  "version": "1.0.0",
+  "description": "Silver Business Suite - Multi-business SaaS Backend API (TypeScript)",
+  "main": "dist/server.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts"
+  },
+  "keywords": [
+    "saas",
+    "invoicing",
+    "quotations",
+    "express",
+    "typescript",
+    "nodejs"
+  ],
+  "author": "Silver Suite Team",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

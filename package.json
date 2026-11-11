@@ -1,0 +1,26 @@
+{
+  "name": "silver-business-suite",
+  "version": "1.0.0",
+  "description": "Silver Business Suite - Modern Commercial Invoice & Quotation SaaS",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "start:backend": "npm --prefix backend start",
+    "build:frontend": "npm --prefix frontend run build",
+    "preview:frontend": "npm --prefix frontend run preview"
+  },
+  "keywords": [
+    "invoice-saas",
+    "quotations",
+    "multi-business",
+    "gst-invoicing",
+    "pdf-designer"
+  ],
+  "author": "Nihal Ops / Silver Suite",
+  "license": "ISC"
+}
