@@ -52,7 +52,5 @@ export interface StatusConfig {
 export interface ApiHealthResponse {
   success: boolean;
   message: string;
-  version: string;
-  timestamp: string;
-  environment: string;
+  database: 'connected' | 'connecting' | 'disconnected' | 'disconnecting';
 }

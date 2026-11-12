@@ -1,42 +1,92 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import morgan from 'morgan';
-import healthRoutes from './routes/healthRoutes.js';
-import { notFoundHandler, errorHandler } from './middlewares/errorHandler.js';
+import cookieParser from 'cookie-parser';
+import rateLimit from 'express-rate-limit';
+import { env } from './config/env.js';
+import healthRoutes from './routes/health.routes.js';
+import authRoutes from './routes/auth.routes.js';
+import businessRoutes from './routes/business.routes.js';
+import superAdminRoutes from './routes/superAdmin.routes.js';
+import { requireDatabaseConnection } from './middleware/dbCheck.middleware.js';
+import { notFoundMiddleware } from './middleware/not-found.middleware.js';
+import { errorMiddleware } from './middleware/error.middleware.js';
 
 const app: Application = express();
 
-// Middlewares
+// 1. Helmet Security Middleware
 app.use(
-  cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    credentials: true,
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
+
+// 2. CORS Configuration
+const allowedOrigins = [env.CLIENT_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked for origin: ${origin}`));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-business-id'],
+  })
+);
+
+// 3. Cookie Parser Middleware
+app.use(cookieParser(env.COOKIE_SECRET));
+
+// 4. Rate Limiting Middleware
+const limiter = rateLimit({
+  windowMs: env.RATE_LIMIT_WINDOW_MS,
+  max: env.RATE_LIMIT_MAX,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    statusCode: 429,
+    message: 'Too many requests from this IP. Please try again after 15 minutes.',
+  },
+});
+app.use('/api', limiter);
+
+// 5. Request Logging
+if (env.NODE_ENV !== 'test') {
+  app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+}
+
+// 6. Body Parsing Middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-if (process.env.NODE_ENV !== 'test') {
-  app.use(morgan('dev'));
-}
+// 7. API Route Mounting
+app.use(env.API_PREFIX, healthRoutes);
 
-// API Routes
-const apiPrefix: string = process.env.API_PREFIX || '/api/v1';
-app.use(`${apiPrefix}`, healthRoutes);
+// Guard all database-dependent API routes against disconnected state
+app.use(`${env.API_PREFIX}/auth`, requireDatabaseConnection, authRoutes);
+app.use(`${env.API_PREFIX}/business`, requireDatabaseConnection, businessRoutes);
+app.use(`${env.API_PREFIX}/super-admin`, requireDatabaseConnection, superAdminRoutes);
 
-// Fallback Root Route
+// 8. Base Root Route
 app.get('/', (_req: Request, res: Response) => {
-  res.json({
+  res.status(200).json({
+    success: true,
     name: 'Silver Business Suite API',
-    status: 'Running',
+    status: 'Operational',
     version: '1.0.0',
-    runtime: 'TypeScript',
-    documentation: `${apiPrefix}/health`,
+    documentation: `${env.API_PREFIX}/health`,
   });
 });
 
-// Error handling
-app.use(notFoundHandler);
-app.use(errorHandler);
+// 9. 404 & Centralized Error Handling
+app.use(notFoundMiddleware);
+app.use(errorMiddleware);
 
 export default app;

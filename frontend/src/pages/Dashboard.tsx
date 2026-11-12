@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FileText,
   FileSpreadsheet,
@@ -8,7 +8,8 @@ import {
   AlertTriangle,
   Calendar,
   RefreshCw,
-  Plus
+  Plus,
+  Database
 } from 'lucide-react';
 import MetricCard from '../components/dashboard/MetricCard';
 import RevenueChart from '../components/dashboard/RevenueChart';
@@ -17,14 +18,33 @@ import RecentInvoicesTable from '../components/dashboard/RecentInvoicesTable';
 import RecentQuotationsList from '../components/dashboard/RecentQuotationsList';
 import QuickActions from '../components/dashboard/QuickActions';
 import { Link } from 'react-router-dom';
+import { checkApiHealth } from '../services/api';
+import { ApiHealthResponse } from '../types';
+import { useBusiness } from '../hooks/useBusiness';
 
 export default function Dashboard(): JSX.Element {
+  const { activeBusiness } = useBusiness();
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [selectedPeriod, setSelectedPeriod] = useState<string>('This Fiscal Month');
+  const [healthData, setHealthData] = useState<{
+    checked: boolean;
+    isOnline: boolean;
+    data?: ApiHealthResponse;
+  }>({ checked: false, isOnline: false });
 
-  const handleRefresh = (): void => {
+  const testApi = async () => {
+    const res = await checkApiHealth();
+    setHealthData({ checked: true, isOnline: res.isOnline, data: res.data });
+  };
+
+  useEffect(() => {
+    testApi();
+  }, []);
+
+  const handleRefresh = async (): Promise<void> => {
     setIsRefreshing(true);
-    setTimeout(() => setIsRefreshing(false), 800);
+    await testApi();
+    setTimeout(() => setIsRefreshing(false), 600);
   };
 
   return (
@@ -40,9 +60,41 @@ export default function Dashboard(): JSX.Element {
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>Tenant Live</span>
             </span>
+
+            {/* Live Backend Connection Indicator */}
+            <span
+              title={
+                healthData.isOnline
+                  ? `Backend: Online | DB: ${healthData.data?.database || 'disconnected'}`
+                  : 'Testing API Connection...'
+              }
+              className={`hidden md:inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
+                healthData.isOnline
+                  ? healthData.data?.database === 'connected'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                  : 'bg-surface-100 text-surface-600 border-surface-200'
+              }`}
+            >
+              <Database className="w-3 h-3 text-brand-600" />
+              <span>
+                {healthData.isOnline
+                  ? `DB: ${healthData.data?.database || 'offline'}`
+                  : 'API: Connecting...'}
+              </span>
+            </span>
           </div>
           <p className="text-xs sm:text-sm text-surface-500">
-            Real-time analytics, revenue recognition, and pending receivables for <strong className="text-surface-700 font-semibold">Silver Horizon Tech</strong>.
+            Real-time analytics, revenue recognition, and pending receivables for{' '}
+            <strong className="text-surface-700 font-semibold">
+              {activeBusiness?.businessName || 'Silver Business'}
+            </strong>
+            {activeBusiness?.businessSlug && (
+              <span className="font-mono text-xs text-brand-600 ml-1.5">
+                (@{activeBusiness.businessSlug})
+              </span>
+            )}
+            .
           </p>
         </div>
 

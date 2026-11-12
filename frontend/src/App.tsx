@@ -2,15 +2,98 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import Dashboard from './pages/Dashboard';
 import PlaceholderPage from './pages/PlaceholderPage';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+
+// Auth Pages
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
+
+// Multi-Business Pages
+import { BusinessSwitcher } from './pages/business/BusinessSwitcher';
+import { BusinessRegistration } from './pages/business/BusinessRegistration';
+import { BusinessProfile } from './pages/business/BusinessProfile';
+
+// Super Admin Pages
+import { SuperAdminDashboard } from './pages/super-admin/SuperAdminDashboard';
+import { BusinessesList } from './pages/super-admin/BusinessesList';
+import { BusinessDetails } from './pages/super-admin/BusinessDetails';
 
 export default function App(): JSX.Element {
   return (
     <Routes>
-      <Route path="/" element={<AppLayout />}>
+      {/* Public Authentication Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* Dedicated Multi-Business Standalone Views */}
+      <Route
+        path="/business/switch"
+        element={
+          <ProtectedRoute>
+            <BusinessSwitcher />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/business/new"
+        element={
+          <ProtectedRoute>
+            <BusinessRegistration />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/business/profile"
+        element={
+          <ProtectedRoute>
+            <BusinessProfile />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Platform Super Admin Oversight Routes */}
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin']}>
+            <SuperAdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/businesses"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin']}>
+            <BusinessesList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/businesses/:id"
+        element={
+          <ProtectedRoute allowedRoles={['super_admin']}>
+            <BusinessDetails />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Protected SaaS Application Shell */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
         {/* Main Dashboard */}
         <Route index element={<Dashboard />} />
 
-        {/* Phase 2 Prepared Modules */}
+        {/* Modules */}
         <Route
           path="invoices"
           element={
@@ -113,22 +196,8 @@ export default function App(): JSX.Element {
           }
         />
 
-        <Route
-          path="settings"
-          element={
-            <PlaceholderPage
-              title="Business Settings"
-              moduleNumber="9"
-              description="Configure company details, logo, GSTIN, bank details, UPI QR code, signature, and default invoice terms."
-              upcomingFeatures={[
-                'Multi-business branding & profile management',
-                'Bank account & UPI QR code for fast payments',
-                'Digital signature upload via Cloudinary',
-                'Default terms & conditions and currency format',
-              ]}
-            />
-          }
-        />
+        {/* Business Settings directly links to full BusinessProfile */}
+        <Route path="settings" element={<BusinessProfile />} />
 
         <Route
           path="subscriptions"

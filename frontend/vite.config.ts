@@ -8,4 +8,19 @@ export default defineConfig({
     port: 5173,
     host: true,
   },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'axios',
+      'zod',
+      '@hookform/resolvers/zod',
+      'react-hook-form',
+      'lucide-react',
+      'recharts',
+      'clsx',
+      'tailwind-merge',
+    ],
+  },
 });
