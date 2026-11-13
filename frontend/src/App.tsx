@@ -20,6 +20,20 @@ import { SuperAdminDashboard } from './pages/super-admin/SuperAdminDashboard';
 import { BusinessesList } from './pages/super-admin/BusinessesList';
 import { BusinessDetails } from './pages/super-admin/BusinessDetails';
 
+// Customer Management Pages (Module 6)
+import { CustomersList } from './pages/customers/CustomersList';
+import { AddCustomer } from './pages/customers/AddCustomer';
+import { EditCustomer } from './pages/customers/EditCustomer';
+import { CustomerDetails } from './pages/customers/CustomerDetails';
+import { CustomerStatement } from './pages/customers/CustomerStatement';
+
+// Product & Service Management Pages (Module 7)
+import { ProductsList } from './pages/products/ProductsList';
+import { AddProduct } from './pages/products/AddProduct';
+import { EditProduct } from './pages/products/EditProduct';
+import { ProductDetails } from './pages/products/ProductDetails';
+import { ProductCategories } from './pages/products/ProductCategories';
+
 export default function App(): JSX.Element {
   return (
     <Routes>
@@ -128,39 +142,19 @@ export default function App(): JSX.Element {
           }
         />
 
-        <Route
-          path="customers"
-          element={
-            <PlaceholderPage
-              title="Customer Directory"
-              moduleNumber="6"
-              description="Central customer directory with contact information, GSTIN details, invoice history, and outstanding balance tracking."
-              upcomingFeatures={[
-                'Comprehensive customer profiles & GSTIN verification',
-                'Customer purchase & payment history ledger',
-                'Outstanding receivables balance tracker',
-                'Bulk client import & export',
-              ]}
-            />
-          }
-        />
+        {/* Module 6: Customer Management */}
+        <Route path="customers" element={<CustomersList />} />
+        <Route path="customers/new" element={<AddCustomer />} />
+        <Route path="customers/:id" element={<CustomerDetails />} />
+        <Route path="customers/:id/edit" element={<EditCustomer />} />
+        <Route path="customers/:id/statement" element={<CustomerStatement />} />
 
-        <Route
-          path="products"
-          element={
-            <PlaceholderPage
-              title="Product & Service Catalog"
-              moduleNumber="7"
-              description="Maintain a reusable library of goods and services with pricing, tax slabs, and HSN/SAC codes."
-              upcomingFeatures={[
-                'Product & Service catalog management',
-                'HSN/SAC code search and GST rate mapping',
-                'Quick item insertion during invoice creation',
-                'Inventory and unit price tracking',
-              ]}
-            />
-          }
-        />
+        {/* Module 7: Product & Service Management */}
+        <Route path="products" element={<ProductsList />} />
+        <Route path="products/new" element={<AddProduct />} />
+        <Route path="products/categories" element={<ProductCategories />} />
+        <Route path="products/:id" element={<ProductDetails />} />
+        <Route path="products/:id/edit" element={<EditProduct />} />
 
         <Route
           path="pdf-designer"

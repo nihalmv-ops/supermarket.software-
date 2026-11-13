@@ -9,6 +9,9 @@ import healthRoutes from './routes/health.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import businessRoutes from './routes/business.routes.js';
 import superAdminRoutes from './routes/superAdmin.routes.js';
+import customerRoutes from './routes/customer.routes.js';
+import productCategoryRoutes from './routes/productCategory.routes.js';
+import productRoutes from './routes/product.routes.js';
 import { requireDatabaseConnection } from './middleware/dbCheck.middleware.js';
 import { notFoundMiddleware } from './middleware/not-found.middleware.js';
 import { errorMiddleware } from './middleware/error.middleware.js';
@@ -73,6 +76,9 @@ app.use(env.API_PREFIX, healthRoutes);
 app.use(`${env.API_PREFIX}/auth`, requireDatabaseConnection, authRoutes);
 app.use(`${env.API_PREFIX}/business`, requireDatabaseConnection, businessRoutes);
 app.use(`${env.API_PREFIX}/super-admin`, requireDatabaseConnection, superAdminRoutes);
+app.use(`${env.API_PREFIX}/customers`, requireDatabaseConnection, customerRoutes);
+app.use(`${env.API_PREFIX}/product-categories`, requireDatabaseConnection, productCategoryRoutes);
+app.use(`${env.API_PREFIX}/products`, requireDatabaseConnection, productRoutes);
 
 // 8. Base Root Route
 app.get('/', (_req: Request, res: Response) => {

@@ -72,14 +72,21 @@ export const connectDatabase = async (): Promise<boolean> => {
   try {
     console.log(`📡 [Database] Connecting to MongoDB...`);
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 10000, // Timeout after 10s if server unreachable
-      autoIndex: env.NODE_ENV !== 'production', // Build indexes in development only
+      serverSelectionTimeoutMS: 15000,
+      autoIndex: env.NODE_ENV !== 'production',
     });
     return true;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown connection error';
     console.error(`❌ [Database] Failed to connect to MongoDB: ${message}`);
     console.warn('💡 [Database] Running server with database status: DISCONNECTED');
+    // Automatically retry connection after 5 seconds
+    setTimeout(() => {
+      if (mongoose.connection.readyState === 0) {
+        console.log('🔄 [Database] Retrying MongoDB connection...');
+        connectDatabase().catch(() => {});
+      }
+    }, 5000);
     return false;
   }
 };
